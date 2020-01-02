@@ -284,7 +284,7 @@ class App extends React.Component<{}, AppState> {
   private onKeyDown = (event: KeyboardEvent) => {
     if (
       event.key === "Backspace" &&
-      (event.target as HTMLElement)?.nodeName !== "INPUT"
+      ((event.target as HTMLElement) || {}).nodeName !== "INPUT"
     ) {
       for (var i = elements.length - 1; i >= 0; --i) {
         if (elements[i].isSelected) {
@@ -382,7 +382,37 @@ class App extends React.Component<{}, AppState> {
           />
           px)
         </div>
-        <div>
+        <div
+          onCopy={e => {
+            e.clipboardData.setData(
+              "text/plain",
+              JSON.stringify(elements.filter(element => element.isSelected))
+            );
+            e.preventDefault();
+          }}
+          onPaste={e => {
+            const paste = e.clipboardData.getData("text");
+            let parsedElements;
+            try {
+              parsedElements = JSON.parse(paste);
+            } catch (e) {}
+            if (
+              Array.isArray(parsedElements) &&
+              parsedElements.length > 0 &&
+              parsedElements[0].type // need to implement a better check here...
+            ) {
+              clearSelection();
+              parsedElements.forEach(parsedElement => {
+                parsedElement.x += 10;
+                parsedElement.y += 10;
+                generateDraw(parsedElement);
+                elements.push(parsedElement);
+              });
+              drawScene();
+            }
+            e.preventDefault();
+          }}
+        >
           {this.renderOption({ type: "rectangle", children: "Rectangle" })}
           {this.renderOption({ type: "ellipse", children: "Ellipse" })}
           {this.renderOption({ type: "arrow", children: "Arrow" })}
