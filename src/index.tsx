@@ -369,7 +369,7 @@ class App extends React.Component<{}, AppState> {
                 this.setState({ exportVisibleOnly: e.target.checked });
               }}
             />
-            visible area only
+            test 123
           </label>
           (padding:
           <input
